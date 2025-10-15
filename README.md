@@ -9,7 +9,8 @@ I build robust, scalable data solutions using:
 - Azure Data Factory, Databricks (PySpark), Synapse  
 - SQL Server, Oracle PL/SQL  
 - Power BI, SSIS, SSRS, SSAS  
-- Python, Delta Lake, Data Pipelines  
+- Python, Delta Lake, Data Pipelines
+- Power BI
 
 ## Sample Projects
 - **ETL Pipeline Automation:** Built an end-to-end pipeline on Azure ADF + Databricks integrating SQL Server and Blob Storage.  
