@@ -1,0 +1,85 @@
+DECLARE
+  F_FILEDIR VARCHAR2(60);
+
+  F_FILEHANDLE_R UTL_FILE.FILE_TYPE;
+  F_FILENAME_R   VARCHAR2(160);
+  F_LINE_R       VARCHAR2(4000);
+
+  F_FILEHANDLE_W UTL_FILE.FILE_TYPE;
+  F_FILENAME_W   VARCHAR2(160);
+  F_LINE_W       VARCHAR2(4000);
+
+  
+
+  v_Entity_No  number(10);
+  v_legal_ref_no   VARCHAR2(25);
+
+
+BEGIN
+  F_FILEDIR := '/nfsdata/OraReports/Vitality';
+
+  F_FILENAME_R   := 'irfhan_test_file.csv';
+  F_FILEHANDLE_R := UTL_FILE.FOPEN(F_FILEDIR, F_FILENAME_R, 'r');
+
+  F_FILENAME_W   := 'irfhan_test_file_out.csv';
+  F_FILEHANDLE_W := UTL_FILE.FOPEN(F_FILEDIR, F_FILENAME_W, 'w');
+
+  LOOP
+  
+    BEGIN
+      UTL_FILE.GET_LINE(F_FILEHANDLE_R, F_LINE_R);
+    EXCEPTION
+      WHEN NO_DATA_FOUND THEN
+        EXIT;
+    END;
+  
+    F_LINE_R := REPLACE(F_LINE_R, CHR(13), NULL);
+  
+    pkg_mis_util.unstring_param_list(F_LINE_R); 
+    BEGIN
+      v_ENTITY_NO  := pkg_mis_util.param_list(1); 
+      
+      /*instead of doing this
+      V_accno := SUBSTR(F_LINE_R, 2, 23);*/
+    EXCEPTION
+      WHEN OTHERS THEN
+        NULL;
+    END;
+  
+    BEGIN 
+
+select z.entity_no,
+       z.legal_ref_no
+       
+               into   v_Entity_No,
+  v_legal_ref_no
+       
+       from 
+
+      (select e.entity_no, e.legal_ref_no
+from wh_ca_ent.entity        e
+where sysdate between e.sys_eff_from and e.sys_eff_to
+and e.entity_no = v_Entity_No ) z;
+         
+         
+                   exception
+            WHEN OTHERS THEN  
+            v_Entity_No := '0';
+            v_legal_ref_no := 'Invalid';
+
+      
+       end;
+    
+      F_LINE_W := F_LINE_R || ',' || V_ENTITY_NO || ',' || v_legal_ref_no  ;
+  
+  
+        
+    UTL_FILE.PUT_LINE(F_FILEHANDLE_W, F_LINE_W);
+    UTL_FILE.FFLUSH(F_FILEHANDLE_W);
+  
+  END LOOP;
+
+  UTL_FILE.FCLOSE(F_FILEHANDLE_R);
+  UTL_FILE.FCLOSE(F_FILEHANDLE_W);
+
+END;
